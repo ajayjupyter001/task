@@ -24,4 +24,4 @@ patchesJson6902: #patch
       group: postgres-operator.crunchydata.com # specify the api group
       version: v1beta1  #specify the version
       kind: PostgresCluster # specify the CRD
-      name: cep-dev-postgres-cluster
+      name: <<postgress-cluster-name>>
