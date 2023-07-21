@@ -1,0 +1,11 @@
+apiVersion: postgres-operator.crunchydata.com/v1beta1
+kind: PostgresCluster
+metadata:
+  name: postgres-cluster-name
+spec:
+  users: # Please update as needed
+    - databases:
+        - cepdev-master-db
+      name: cepappdev
+      password:
+        type: AlphaNumeric

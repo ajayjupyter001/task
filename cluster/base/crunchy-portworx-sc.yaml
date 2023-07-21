@@ -1,0 +1,17 @@
+#Portworx StorageClass for crunchy with replication set to 3 and reclaim policy set to retain
+allowVolumeExpansion: true
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: crunchy-portworx-sc
+parameters:
+  csi.storage.k8s.io/provisioner-secret-name: px-user-token
+  csi.storage.k8s.io/provisioner-secret-namespace: portworx
+  csi.storage.k8s.io/node-publish-secret-name: px-user-token
+  csi.storage.k8s.io/node-publish-secret-namespace: portworx
+  csi.storage.k8s.io/controller-expand-secret-name: px-user-token
+  csi.storage.k8s.io/controller-expand-secret-namespace: portworx
+  repl: "2"
+provisioner: pxd.portworx.com
+reclaimPolicy: Retain
+volumeBindingMode: Immediate

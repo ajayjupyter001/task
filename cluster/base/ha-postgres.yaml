@@ -1,0 +1,112 @@
+apiVersion: postgres-operator.crunchydata.com/v1beta1
+kind: PostgresCluster
+metadata:
+  name: postgres-cluster-name
+spec:
+  imagePullSecrets:
+    - name: crunchy-regcred
+  image: crunchy-postgres
+  postgresVersion: 14
+  instances:
+    - name: productenv
+      replicas: 3
+      metadata:
+        labels:
+          tags.datadoghq.com/service: postgrescluster-product-env
+      dataVolumeClaimSpec:
+        storageClassName:  crunchy-portworx-sc
+        accessModes:
+        - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: 400Gi
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  postgres-operator.crunchydata.com/cluster: product-env-postgres-cluster
+                  postgres-operator.crunchydata.com/instance-set: productenv
+  backups:
+    pgbackrest:
+      image: crunchy-pgbackrest
+      manual:
+        repoName: repo2
+        options:
+         - --type=full
+      configuration:
+      - secret:
+          name: pgo-multi-repo-creds
+      global:
+        process-max: "4"
+        repo1-retention-full: "7"
+        repo1-retention-full-type: time
+        repo2-retention-full: "7"
+        repo2-retention-full-type: time
+        repo2-path: /pgbackrest/postgres-operator/hippo-multi-repo/repo2
+      repos:
+      - name: repo1
+        schedules:
+          full: "0 1 * * 0-6"
+        volume:
+          volumeClaimSpec:
+            storageClassName:  crunchy-portworx-sc
+            accessModes:
+            - "ReadWriteOnce"
+            resources:
+              requests:
+                storage: 1024Gi
+      - name: repo2
+        schedules:
+          full: "0 13 * * 0-6"
+        azure:
+          container: productenv
+  users: # Please update as needed
+    - databases:
+        - test-db
+      name: productappenv
+  patroni:
+    dynamicConfiguration:
+      postgresql:
+        parameters:						  
+          max_parallel_workers: 100
+          max_worker_processes: 100
+          shared_buffers: 2560MB
+          work_mem: 256MB
+          max_wal_size: 4096
+          max_connections: 1000
+          idle_in_transaction_session_timeout: 300000
+  proxy:
+    pgBouncer:
+      image: crunchy-pgbouncer
+      service:
+        type: NodePort
+      replicas: 2
+      config:
+        global:
+          pool_mode: transaction
+          default_pool_size: "200"
+          max_client_conn: "500"
+          query_wait_timeout: "180"
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  postgres-operator.crunchydata.com/cluster: product-env-postgres-cluster
+                  postgres-operator.crunchydata.com/role: pgbouncer
+  metadata:
+    annotations:
+      ad.datadoghq.com/database.check_names: '["openmetrics"]'
+      ad.datadoghq.com/database.init_configs: '[{}]'
+      ad.datadoghq.com/database.instances: '[{"prometheus_url": "http://%%host%%:9187/metrics","namespace": "crunchy_data","metrics": ["ccp_nodemx_data_disk_total_bytes", "ccp_nodemx_data_disk_available_bytes", "ccp_backrest_last_full_backup_time_since_completion_seconds", "ccp_backrest_last_incr_backup_time_since_completion_seconds", "ccp_connection_stats_active", "ccp_connection_stats_max_connections", "ccp_is_in_recovery_status", "ccp_settings_pending_restart_count", "pg_exporter_last_scrape_error", "pg_up", "ccp_replication_lag_received_time", "ccp_replication_lag_size_bytes", "ccp_database_size_bytes", "ccp_nodemx_data_disk_total_bytes", "ccp_nodemx_data_disk_available_bytes", "ccp_connection_stats_max_connections", "ccp_postgresql_version_current", "ccp_table_size_size_bytes", "ccp_pg_stat_statements_top_max_exec_time_ms", "ccp_pg_stat_statements_total_calls_count", "ccp_pg_stat_statements_top_mean_exec_time_ms", "ccp_data_checksum_failure_count", "ccp_settings_pending_restart_count", "ccp_stat_database_deadlocks", "ccp_connection_stats_max_blocked_query_time", "ccp_locks_count"]}]'
+  monitoring:
+    pgmonitor:
+      exporter:
+        image: crunchy-postgres-exporter

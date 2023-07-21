@@ -1,0 +1,27 @@
+namespace: postgres-cluster
+secretGenerator:
+- name: pgo-multi-repo-creds
+  files:
+  - azure.conf
+  behavior: replace
+generatorOptions:
+  disableNameSuffixHash: true
+bases:
+- ../../../../base
+patchesStrategicMerge:
+  - ha-postgres.yaml
+patches:
+- target:
+    kind: PostgresCluster
+    name: postgres-cluster-name
+  patch: |-
+    - op: replace
+      path: /metadata/name
+      value: <<postgress-cluster-name>>
+patchesJson6902: #patch
+  - path: metadatapatch.yaml #specify the values file
+    target:
+      group: postgres-operator.crunchydata.com # specify the api group
+      version: v1beta1  #specify the version
+      kind: PostgresCluster # specify the CRD
+      name: cep-dev-postgres-cluster

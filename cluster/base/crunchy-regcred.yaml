@@ -1,0 +1,8 @@
+apiVersion: v1
+data:
+  .dockerconfigjson: <path:secret/data/crunchy/artifactory#secret>
+kind: Secret
+metadata:
+  name: crunchy-regcred
+  namespace: postgres-cluster
+type: kubernetes.io/dockerconfigjson

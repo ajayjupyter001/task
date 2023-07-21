@@ -1,0 +1,26 @@
+namespace: postgres-cluster
+secretGenerator:
+- name: pgo-multi-repo-creds
+  files:
+  - azure.conf
+generatorOptions:
+  disableNameSuffixHash: true
+resources:
+- ha-postgres.yaml
+- crunchy-portworx-sc.yaml
+- crunchy-regcred.yaml
+configurations:
+- postgres-image-transformer.yaml
+images:
+- name: crunchy-postgres
+  newName: crunchy-docker-virtual.jfrog-prod.debsreplatform.cloud/crunchydata/crunchy-postgres
+  newTag: ubi8-14.8-5.3.2-0
+- name: crunchy-pgbackrest
+  newName: crunchy-docker-virtual.jfrog-prod.debsreplatform.cloud/crunchydata/crunchy-pgbackrest
+  newTag: ubi8-5.3.2-0
+- name: crunchy-pgbouncer
+  newName: crunchy-docker-virtual.jfrog-prod.debsreplatform.cloud/crunchydata/crunchy-pgbouncer
+  newTag: ubi8-5.3.2-0
+- name: crunchy-postgres-exporter
+  newName: crunchy-docker-virtual.jfrog-prod.debsreplatform.cloud/crunchydata/crunchy-postgres-exporter
+  newTag: ubi8-5.3.2-0
