@@ -3,7 +3,7 @@
   value: << instance-name >>
 - op: add
   path: /spec/instances/0/metadata/labels
-  value: |
+  value:
       <<cep-label>>
       <<cep-label1>>
 - op: add
