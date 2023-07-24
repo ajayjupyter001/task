@@ -3,7 +3,6 @@ secretGenerator:
 - name: pgo-multi-repo-creds
   literals:
     - repo2-azure-account=<<repo1>>
-    - repo2-azure-key=<<repo2>>
     behavior: replace
   behavior: replace
 generatorOptions:
