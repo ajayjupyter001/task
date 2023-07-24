@@ -2,7 +2,7 @@ namespace: postgres-cluster
 secretGenerator:
 - name: pgo-multi-repo-creds
   literals:
-    - repo1=<<repo1>>
+    - repo2-azure-account=<<repo1>>
     - repo2=<<repo2>>
     behavior: replace
   behavior: replace
