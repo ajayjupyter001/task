@@ -3,7 +3,6 @@ secretGenerator:
 - name: pgo-multi-repo-creds
   literals:
     - repo2-azure-account=<<repo1>>
-    behavior: replace
   behavior: replace
 generatorOptions:
   disableNameSuffixHash: true
