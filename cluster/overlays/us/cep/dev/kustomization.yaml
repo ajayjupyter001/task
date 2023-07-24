@@ -1,8 +1,10 @@
 namespace: postgres-cluster
 secretGenerator:
 - name: pgo-multi-repo-creds
-  files:
-  - azure.conf
+  literals:
+    - repo1=<<repo1>>
+    - repo2=<<repo2>>
+    behavior: replace
   behavior: replace
 generatorOptions:
   disableNameSuffixHash: true
